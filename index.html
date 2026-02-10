@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Look — Research Workspace for Mac</title>
+  <style>
+    /* ── Reset & Base ─────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --bg-alt: #f7f7f8;
+      --text: #1d1d1f;
+      --text-secondary: #6e6e73;
+      --accent: #0071e3;
+      --accent-hover: #0062cc;
+      --border: #e5e5ea;
+      --radius: 14px;
+      --radius-sm: 10px;
+      --shadow: 0 2px 12px rgba(0,0,0,.08);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,.10);
+      --max-w: 1080px;
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Helvetica, Arial, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      font-family: var(--font);
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    /* ── Navigation ───────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,.82);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav .nav-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: -.01em;
+    }
+
+    .nav-brand img {
+      width: 32px;
+      height: 32px;
+      border-radius: 7px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: .875rem;
+      color: var(--text-secondary);
+      transition: color .2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-gh {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 980px;
+      background: var(--text);
+      color: #fff !important;
+      font-size: .8125rem;
+      font-weight: 500;
+      transition: background .2s;
+    }
+
+    .nav-gh:hover { background: #333; }
+
+    .nav-gh svg { width: 16px; height: 16px; fill: #fff; }
+
+    /* ── Hero ─────────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: 80px 24px 0;
+      max-width: var(--max-w);
+      margin: 0 auto;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-size: .8125rem;
+      font-weight: 500;
+      color: var(--accent);
+      background: rgba(0,113,227,.08);
+      padding: 4px 14px;
+      border-radius: 980px;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 5vw, 3.4rem);
+      font-weight: 700;
+      letter-spacing: -.025em;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto 32px;
+      line-height: 1.55;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 56px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 26px;
+      border-radius: 980px;
+      background: var(--text);
+      color: #fff;
+      font-size: .9375rem;
+      font-weight: 500;
+      transition: background .2s;
+    }
+
+    .btn-primary:hover { background: #333; }
+
+    .btn-primary svg { width: 20px; height: 20px; fill: #fff; }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 26px;
+      border-radius: 980px;
+      background: transparent;
+      color: var(--accent);
+      font-size: .9375rem;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      transition: border-color .2s, color .2s;
+    }
+
+    .btn-secondary:hover { border-color: var(--accent); }
+
+    /* ── App Mockup ───────────────────────────────────── */
+    .hero-mockup {
+      max-width: 960px;
+      margin: 0 auto;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+      background: #fafafa;
+    }
+
+    .mockup-titlebar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: #f0f0f1;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+
+    .mockup-body {
+      display: grid;
+      grid-template-columns: 190px 250px 1fr;
+      min-height: 420px;
+    }
+
+    .mockup-sidebar {
+      background: #f5f5f7;
+      border-right: 1px solid var(--border);
+      padding: 16px 12px;
+      font-size: .75rem;
+    }
+
+    .mockup-sidebar .sb-section {
+      margin-bottom: 18px;
+    }
+
+    .mockup-sidebar .sb-label {
+      font-size: .65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .mockup-sidebar .sb-item {
+      padding: 5px 8px;
+      border-radius: 6px;
+      margin-bottom: 2px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mockup-sidebar .sb-item.active {
+      background: rgba(0,113,227,.12);
+      color: var(--accent);
+    }
+
+    .mockup-sidebar .sb-item .sb-icon {
+      width: 14px;
+      text-align: center;
+      opacity: .7;
+    }
+
+    .mockup-list {
+      border-right: 1px solid var(--border);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: .75rem;
+    }
+
+    .mockup-list-item {
+      padding: 8px 10px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mockup-list-item.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .mockup-list-thumb {
+      width: 28px;
+      height: 36px;
+      border-radius: 3px;
+      background: #e0e0e4;
+      flex-shrink: 0;
+    }
+
+    .mockup-list-item.active .mockup-list-thumb {
+      background: rgba(255,255,255,.3);
+    }
+
+    .mockup-list-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .mockup-list-title {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .mockup-list-sub {
+      opacity: .6;
+      font-size: .65rem;
+      margin-top: 1px;
+    }
+
+    .mockup-detail {
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mockup-detail-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      font-size: .7rem;
+      color: var(--text-secondary);
+    }
+
+    .mockup-pdf-area {
+      flex: 1;
+      background: #e8e8ed;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mockup-pdf-page {
+      width: 65%;
+      height: 88%;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.08);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mockup-text-line {
+      height: 5px;
+      background: #d1d1d6;
+      border-radius: 3px;
+    }
+
+    .mockup-text-line:nth-child(odd) { width: 100%; }
+    .mockup-text-line:nth-child(even) { width: 80%; }
+
+    .mockup-highlight {
+      height: 5px;
+      background: rgba(255,214,10,.55);
+      border-radius: 3px;
+      width: 70%;
+    }
+
+    .mockup-tags {
+      display: flex;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    .mockup-tag {
+      font-size: .55rem;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .mockup-tag-blue { background: rgba(0,113,227,.12); color: var(--accent); }
+    .mockup-tag-green { background: rgba(52,199,89,.15); color: #248a3d; }
+
+    /* ── Feature Sections ─────────────────────────────── */
+    .features-section {
+      padding: 100px 24px;
+    }
+
+    .feature-row {
+      max-width: var(--max-w);
+      margin: 0 auto 100px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .feature-row:last-child { margin-bottom: 0; }
+
+    .feature-row.reverse .feature-text { order: 2; }
+    .feature-row.reverse .feature-visual { order: 1; }
+
+    .feature-text h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    .feature-text p {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .feature-visual {
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      background: #fafafa;
+    }
+
+    /* ── PDF Viewer Visual ────────────────────────────── */
+    .vis-pdf {
+      padding: 20px;
+      display: flex;
+      gap: 14px;
+      min-height: 320px;
+    }
+
+    .vis-pdf-thumbs {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 56px;
+      flex-shrink: 0;
+    }
+
+    .vis-pdf-thumb {
+      width: 56px;
+      height: 72px;
+      border-radius: 4px;
+      background: #fff;
+      border: 2px solid transparent;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+
+    .vis-pdf-thumb.active { border-color: var(--accent); }
+
+    .vis-pdf-main {
+      flex: 1;
+      background: #e8e8ed;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .vis-pdf-page {
+      width: 80%;
+      height: 85%;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.06);
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .vis-pdf-page .mockup-highlight { width: 60%; }
+
+    /* ── Notes Visual ─────────────────────────────────── */
+    .vis-notes {
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 320px;
+    }
+
+    .vis-notes-editor {
+      padding: 20px;
+      font-family: "SF Mono", "Fira Code", "Menlo", monospace;
+      font-size: .72rem;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      border-right: 1px solid var(--border);
+      background: #fff;
+    }
+
+    .vis-notes-editor .md-h { color: var(--text); font-weight: 700; }
+    .vis-notes-editor .md-bold { color: var(--text); font-weight: 600; }
+    .vis-notes-editor .md-link { color: var(--accent); }
+    .vis-notes-editor .md-highlight { background: rgba(255,214,10,.35); padding: 1px 2px; border-radius: 2px; }
+
+    .vis-notes-preview {
+      padding: 20px;
+      font-size: .8rem;
+      line-height: 1.7;
+      background: #fafafa;
+    }
+
+    .vis-notes-preview h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .vis-notes-preview p {
+      color: var(--text-secondary);
+      font-size: .78rem;
+      margin-bottom: 8px;
+    }
+
+    .vis-notes-preview .preview-highlight {
+      background: rgba(255,214,10,.3);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: .72rem;
+      color: var(--text);
+      border-left: 3px solid #ffd60a;
+      margin: 10px 0;
+    }
+
+    .vis-notes-preview .preview-link {
+      color: var(--accent);
+      text-decoration: underline;
+      text-decoration-color: rgba(0,113,227,.3);
+    }
+
+    /* ── Linking Visual ───────────────────────────────── */
+    .vis-linking {
+      padding: 28px 24px;
+      min-height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+    }
+
+    .link-card {
+      background: #fff;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 2px 10px rgba(0,0,0,.06);
+      padding: 18px;
+      width: 200px;
+      font-size: .75rem;
+    }
+
+    .link-card-label {
+      font-size: .6rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: .04em;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .link-card-title {
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .link-card-snippet {
+      color: var(--text-secondary);
+      font-size: .7rem;
+      line-height: 1.5;
+    }
+
+    .link-card-snippet .hl {
+      background: rgba(255,214,10,.4);
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+
+    .link-arrows {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--accent);
+      font-size: .65rem;
+      font-weight: 600;
+    }
+
+    .link-arrows svg {
+      width: 32px;
+      height: 32px;
+      fill: var(--accent);
+    }
+
+    /* ── More Features Grid ───────────────────────────── */
+    .more-features {
+      background: var(--bg-alt);
+      padding: 80px 24px;
+    }
+
+    .more-features-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+    }
+
+    .more-features h2 {
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      margin-bottom: 48px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .grid-card {
+      background: var(--bg);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      border: 1px solid var(--border);
+    }
+
+    .grid-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .grid-card p {
+      font-size: .875rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    .grid-card-icon {
+      font-size: 1.5rem;
+      margin-bottom: 12px;
+    }
+
+    /* ── CTA Section ──────────────────────────────────── */
+    .cta-section {
+      padding: 100px 24px;
+      text-align: center;
+    }
+
+    .cta-section h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      margin-bottom: 12px;
+    }
+
+    .cta-section p {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+
+    /* ── Footer ───────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 24px;
+      text-align: center;
+      font-size: .8125rem;
+      color: var(--text-secondary);
+    }
+
+    footer .footer-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer .footer-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+
+    footer .footer-links a { transition: color .2s; }
+    footer .footer-links a:hover { color: var(--text); }
+
+    /* ── Responsive ───────────────────────────────────── */
+    @media (max-width: 840px) {
+      .feature-row { grid-template-columns: 1fr; gap: 32px; }
+      .feature-row.reverse .feature-text { order: 1; }
+      .feature-row.reverse .feature-visual { order: 2; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .mockup-body { grid-template-columns: 160px 1fr; }
+      .mockup-list { display: none; }
+      footer .footer-inner { flex-direction: column; gap: 16px; }
+    }
+
+    @media (max-width: 560px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 2rem; }
+      .mockup-body { grid-template-columns: 1fr; }
+      .mockup-sidebar { display: none; }
+      .nav-links { gap: 16px; }
+      .vis-notes { grid-template-columns: 1fr; }
+      .vis-notes-editor { border-right: none; border-bottom: 1px solid var(--border); }
+      .vis-linking { flex-direction: column; gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation ───────────────────────────────────── -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">
+      <img src="icon.png" alt="Look icon">
+      Look
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#more-features">More</a></li>
+      <li>
+        <a href="https://github.com/adamkz/look/releases" class="nav-gh">
+          <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          Download
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ── Hero ─────────────────────────────────────────── -->
+<section class="hero">
+  <span class="hero-badge">Native macOS + iPadOS &middot; Apple Silicon ready</span>
+  <h1>Your research,<br>all in one place.</h1>
+  <p>A native workspace that combines PDF &amp; EPUB reading with Markdown note&#8209;taking. Organize with collections and tags, search across your library, and keep everything local by default.</p>
+  <div class="hero-actions">
+    <a href="https://github.com/adamkz/look/releases" class="btn-primary">
+      <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      Download on GitHub
+    </a>
+    <a href="#features" class="btn-secondary">Learn More</a>
+  </div>
+
+  <!-- App Mockup -->
+  <div class="hero-mockup">
+    <div class="mockup-titlebar">
+      <span class="dot dot-r"></span>
+      <span class="dot dot-y"></span>
+      <span class="dot dot-g"></span>
+    </div>
+    <div class="mockup-body">
+      <!-- Sidebar -->
+      <div class="mockup-sidebar">
+        <div class="sb-section">
+          <div class="sb-label">Library</div>
+          <div class="sb-item active"><span class="sb-icon">&#128196;</span> All Documents</div>
+          <div class="sb-item"><span class="sb-icon">&#128221;</span> All Notes</div>
+        </div>
+        <div class="sb-section">
+          <div class="sb-label">Collections</div>
+          <div class="sb-item"><span class="sb-icon">&#128193;</span> Machine Learning</div>
+          <div class="sb-item"><span class="sb-icon">&#128193;</span> Neuroscience</div>
+          <div class="sb-item"><span class="sb-icon">&#128193;</span> Statistics</div>
+        </div>
+        <div class="sb-section">
+          <div class="sb-label">Tags</div>
+          <div class="sb-item"><span style="color:#007aff">&#9679;</span> To Read</div>
+          <div class="sb-item"><span style="color:#34c759">&#9679;</span> Important</div>
+          <div class="sb-item"><span style="color:#ff9500">&#9679;</span> Review</div>
+        </div>
+      </div>
+      <!-- Content List -->
+      <div class="mockup-list">
+        <div class="mockup-list-item active">
+          <div class="mockup-list-thumb"></div>
+          <div class="mockup-list-meta">
+            <div class="mockup-list-title">Attention Is All You Need</div>
+            <div class="mockup-list-sub">Vaswani et al. &middot; Today</div>
+          </div>
+        </div>
+        <div class="mockup-list-item">
+          <div class="mockup-list-thumb"></div>
+          <div class="mockup-list-meta">
+            <div class="mockup-list-title">Deep Residual Learning</div>
+            <div class="mockup-list-sub">He et al. &middot; Yesterday</div>
+            <div class="mockup-tags">
+              <span class="mockup-tag mockup-tag-green">Important</span>
+            </div>
+          </div>
+        </div>
+        <div class="mockup-list-item">
+          <div class="mockup-list-thumb"></div>
+          <div class="mockup-list-meta">
+            <div class="mockup-list-title">BERT: Pre-training of Deep&hellip;</div>
+            <div class="mockup-list-sub">Devlin et al. &middot; Jan 30</div>
+            <div class="mockup-tags">
+              <span class="mockup-tag mockup-tag-blue">To Read</span>
+            </div>
+          </div>
+        </div>
+        <div class="mockup-list-item">
+          <div class="mockup-list-thumb"></div>
+          <div class="mockup-list-meta">
+            <div class="mockup-list-title">Generative Adversarial Nets</div>
+            <div class="mockup-list-sub">Goodfellow et al. &middot; Jan 28</div>
+          </div>
+        </div>
+        <div class="mockup-list-item">
+          <div class="mockup-list-thumb"></div>
+          <div class="mockup-list-meta">
+            <div class="mockup-list-title">ImageNet Classification</div>
+            <div class="mockup-list-sub">Krizhevsky et al. &middot; Jan 25</div>
+          </div>
+        </div>
+      </div>
+      <!-- Detail Area -->
+      <div class="mockup-detail">
+        <div class="mockup-detail-toolbar">
+          <span>Page 3 of 15</span>
+          <span>Zoom: Fit Width</span>
+        </div>
+        <div class="mockup-pdf-area">
+          <div class="mockup-pdf-page">
+            <div class="mockup-text-line"></div>
+            <div class="mockup-text-line"></div>
+            <div class="mockup-highlight"></div>
+            <div class="mockup-text-line"></div>
+            <div class="mockup-text-line"></div>
+            <div class="mockup-text-line"></div>
+            <div class="mockup-highlight" style="width:55%; background:rgba(52,199,89,.35)"></div>
+            <div class="mockup-text-line"></div>
+            <div class="mockup-text-line"></div>
+            <div class="mockup-text-line" style="width:60%"></div>
+            <div class="mockup-text-line"></div>
+            <div class="mockup-text-line"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Feature Sections ────────────────────────────── -->
+<section id="features" class="features-section">
+
+  <!-- PDF Reader -->
+  <div class="feature-row">
+    <div class="feature-text">
+      <h2>A PDF &amp; EPUB reader built for research.</h2>
+      <p>Read with a thumbnail sidebar, multi-page display modes, and smooth zoom controls. Highlight or underline with six colors, and keep everything organized in one workspace.</p>
+    </div>
+    <div class="feature-visual">
+      <div class="vis-pdf">
+        <div class="vis-pdf-thumbs">
+          <div class="vis-pdf-thumb active"></div>
+          <div class="vis-pdf-thumb"></div>
+          <div class="vis-pdf-thumb"></div>
+          <div class="vis-pdf-thumb"></div>
+        </div>
+        <div class="vis-pdf-main">
+          <div class="vis-pdf-page">
+            <div class="mockup-text-line"></div>
+            <div class="mockup-text-line"></div>
+            <div class="mockup-highlight" style="width:75%"></div>
+            <div class="mockup-text-line"></div>
+            <div class="mockup-text-line"></div>
+            <div class="mockup-highlight" style="width:50%;background:rgba(0,122,255,.25)"></div>
+            <div class="mockup-text-line"></div>
+            <div class="mockup-text-line" style="width:65%"></div>
+            <div class="mockup-text-line"></div>
+            <div class="mockup-text-line"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Markdown Notes -->
+  <div class="feature-row reverse">
+    <div class="feature-text">
+      <h2>Markdown notes that stay fast.</h2>
+      <p>Write in Markdown with live preview, a formatting toolbar, built&#8209;in templates, and auto&#8209;save. Use wiki links to connect your notes and keep ideas easy to revisit.</p>
+    </div>
+    <div class="feature-visual">
+      <div class="vis-notes">
+        <div class="vis-notes-editor">
+          <span class="md-h"># Literature Review</span><br><br>
+          <span class="md-bold">**Key Finding:**</span> The transformer<br>
+          architecture replaces recurrence with<br>
+          <span class="md-highlight">multi-head self-attention</span>,<br>
+          achieving SOTA on translation.<br><br>
+          See <span class="md-link">[[Attention Is All You Need]]</span><br>
+          page 3, highlight #2.
+        </div>
+        <div class="vis-notes-preview">
+          <h3>Literature Review</h3>
+          <p><strong>Key Finding:</strong> The transformer architecture replaces recurrence with <mark style="background:rgba(255,214,10,.35)">multi-head self-attention</mark>, achieving SOTA on translation.</p>
+          <div class="preview-highlight">"Attention mechanism allows modeling dependencies without regard to distance in sequences."</div>
+          <p>See <span class="preview-link">Attention Is All You Need</span> page 3, highlight #2.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deep Linking -->
+  <div class="feature-row">
+    <div class="feature-text">
+      <h2>Organize your library with ease.</h2>
+      <p>Group documents into collections, add color-coded tags, and edit metadata from a clean three-pane interface. Find what you need quickly with filename and content search.</p>
+    </div>
+    <div class="feature-visual">
+      <div class="vis-linking">
+        <div class="link-card">
+          <div class="link-card-label">Collection</div>
+          <div class="link-card-title">Machine Learning</div>
+          <div class="link-card-snippet">Keep related papers together so you can browse and compare in context.</div>
+        </div>
+        <div class="link-arrows">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14 5l7 7-7 7M3 12h17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="transform:scaleX(-1)"><path d="M14 5l7 7-7 7M3 12h17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Organized
+        </div>
+        <div class="link-card">
+          <div class="link-card-label">Tag</div>
+          <div class="link-card-title">Important</div>
+          <div class="link-card-snippet">Use colored tags to mark what matters and filter lists at a glance.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ── More Features Grid ──────────────────────────── -->
+<section id="more-features" class="more-features">
+  <div class="more-features-inner">
+    <h2>More Features</h2>
+    <div class="features-grid">
+
+      <div class="grid-card">
+        <div class="grid-card-icon">&#128274;</div>
+        <h3>Privacy First</h3>
+        <p>All data stored locally by default. No cloud required, and no tracking during normal use.</p>
+      </div>
+
+      <div class="grid-card">
+        <div class="grid-card-icon">&#128193;</div>
+        <h3>Collections &amp; Tags</h3>
+        <p>Organize with collections and color-coded tags. Add structure without locking your library into a rigid folder tree.</p>
+      </div>
+
+      <div class="grid-card">
+        <div class="grid-card-icon">&#128269;</div>
+        <h3>Search</h3>
+        <p>Search by filename or content and jump straight to what you&rsquo;re looking for in PDFs and notes.</p>
+      </div>
+
+      <div class="grid-card">
+        <div class="grid-card-icon">&#128196;</div>
+        <h3>Smart Import</h3>
+        <p>Drag-and-drop PDFs with automatic SHA-256 deduplication, metadata extraction, and OCR detection.</p>
+      </div>
+
+      <div class="grid-card">
+        <div class="grid-card-icon">&#127912;</div>
+        <h3>Six Highlight Colors</h3>
+        <p>Annotate with yellow, green, blue, pink, orange, and purple. Give every color a semantic meaning.</p>
+      </div>
+
+      <div class="grid-card">
+        <div class="grid-card-icon">&#128209;</div>
+        <h3>Note Templates</h3>
+        <p>Start from blank, literature review, or meeting notes templates to keep writing consistent.</p>
+      </div>
+
+      <div class="grid-card">
+        <div class="grid-card-icon">&#128241;</div>
+        <h3>iPadOS App</h3>
+        <p>Work on iPad with a touch-optimized interface and feature parity with macOS.</p>
+      </div>
+
+      <div class="grid-card">
+        <div class="grid-card-icon">&#128214;</div>
+        <h3>EPUB Support</h3>
+        <p>Import and read EPUBs alongside PDFs, using the same organization and search workflows.</p>
+      </div>
+
+      <div class="grid-card">
+        <div class="grid-card-icon">&#128187;</div>
+        <h3>Native macOS</h3>
+        <p>Built with SwiftUI and PDFKit. Feels right at home alongside Finder, Spotlight, and your other Mac apps.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ──────────────────────────────────────────── -->
+<section class="cta-section">
+  <h2>Ready to organize your research?</h2>
+  <p>Look is free, open source, and built for researchers who value privacy.</p>
+  <a href="https://github.com/adamkz/look/releases" class="btn-primary" style="font-size:1rem;padding:14px 32px">
+    <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="width:22px;height:22px"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    Get Look on GitHub
+  </a>
+</section>
+
+<!-- ── Footer ──────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <span>&copy; 2026 Look. All rights reserved.</span>
+    <ul class="footer-links">
+      <li><a href="https://github.com/adamkz/look">GitHub</a></li>
+      <li><a href="https://github.com/adamkz/look/blob/main/docs/storage-and-security.md">Privacy</a></li>
+      <li><a href="https://github.com/adamkz/look/tree/main/docs">Docs</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

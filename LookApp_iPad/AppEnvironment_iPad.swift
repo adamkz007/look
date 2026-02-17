@@ -80,6 +80,9 @@ final class AppEnvironment_iPad: ObservableObject {
 
         // One-time thumbnail regeneration
         await regenerateThumbnailsIfNeeded()
+
+        // One-time tag color assignment for existing tags
+        await assignColorsToExistingTags()
     }
 
     /// Creates a default library in the app's Documents directory.
@@ -148,5 +151,58 @@ final class AppEnvironment_iPad: ObservableObject {
 
         logger.info("One-time thumbnail regeneration finished — \(result.succeeded) succeeded, \(result.failed) failed")
         UserDefaults.standard.set(true, forKey: Self.thumbnailRegenerationKey)
+    }
+
+    // MARK: - One-Time Tag Color Assignment
+
+    private static let tagColorAssignmentKey = "look.tags.colors.assigned.v1"
+
+    private func assignColorsToExistingTags() async {
+        guard !UserDefaults.standard.bool(forKey: Self.tagColorAssignmentKey) else { return }
+
+        let logger = LookLogger(category: "tags")
+        logger.info("Starting one-time tag color assignment for existing tags")
+
+        // Fetch all existing tags
+        collectionService.fetchAllTags()
+        let existingTags = collectionService.tags
+
+        guard !existingTags.isEmpty else {
+            UserDefaults.standard.set(true, forKey: Self.tagColorAssignmentKey)
+            return
+        }
+
+        // Check if any tags need color assignment (have default blue or no color)
+        let defaultBlueColor = "#3B82F6"
+        let tagsNeedingColors = existingTags.filter { tag in
+            tag.color == nil || tag.color == defaultBlueColor
+        }
+
+        guard !tagsNeedingColors.isEmpty else {
+            UserDefaults.standard.set(true, forKey: Self.tagColorAssignmentKey)
+            logger.info("All tags already have assigned colors")
+            return
+        }
+
+        logger.info("Assigning colors to \(tagsNeedingColors.count) existing tags")
+
+        // Sort tags by name to ensure consistent ordering
+        let sortedTags = tagsNeedingColors.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+
+        // Assign colors from the palette
+        for (index, tag) in sortedTags.enumerated() {
+            let colorIndex = index % CollectionService.tagColorPalette.count
+            let newColor = CollectionService.tagColorPalette[colorIndex]
+
+            do {
+                try await collectionService.updateTag(tag.id, color: newColor)
+                logger.info("Assigned color \(newColor) to tag: \(tag.name)")
+            } catch {
+                logger.error("Failed to assign color to tag \(tag.name): \(error.localizedDescription)")
+            }
+        }
+
+        UserDefaults.standard.set(true, forKey: Self.tagColorAssignmentKey)
+        logger.info("One-time tag color assignment completed")
     }
 }

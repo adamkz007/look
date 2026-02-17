@@ -80,6 +80,9 @@ final class AppEnvironment: ObservableObject {
 
         // One-time thumbnail regeneration for existing PDFs
         await regenerateThumbnailsIfNeeded()
+
+        // One-time tag color assignment for existing tags
+        await assignColorsToExistingTags()
     }
 
     // MARK: - One-Time Thumbnail Regeneration
@@ -117,5 +120,68 @@ final class AppEnvironment: ObservableObject {
 
         // Mark as complete so this never runs again
         UserDefaults.standard.set(true, forKey: Self.thumbnailRegenerationKey)
+    }
+
+    // MARK: - One-Time Tag Color Assignment
+
+    private static let tagColorAssignmentKey = "look.tags.colors.assigned.v1"
+
+    /// Resets the tag color assignment flag, allowing colors to be reassigned.
+    public func resetTagColorAssignmentFlag() {
+        UserDefaults.standard.set(false, forKey: Self.tagColorAssignmentKey)
+    }
+
+    /// Assigns colors to existing tags that were created before automatic color assignment.
+    /// Gated by a UserDefaults flag so it only executes once per library.
+    private func assignColorsToExistingTags() async {
+        guard !UserDefaults.standard.bool(forKey: Self.tagColorAssignmentKey) else { return }
+
+        let logger = LookLogger(category: "tags")
+        logger.info("Starting one-time tag color assignment for existing tags")
+
+        // Fetch all existing tags
+        collectionService.fetchAllTags()
+        let existingTags = collectionService.tags
+
+        guard !existingTags.isEmpty else {
+            // No tags yet — mark as done so we don't re-check every launch
+            UserDefaults.standard.set(true, forKey: Self.tagColorAssignmentKey)
+            return
+        }
+
+        // Check if any tags need color assignment (have default blue or no color)
+        let defaultBlueColor = "#3B82F6"
+        let tagsNeedingColors = existingTags.filter { tag in
+            tag.color == nil || tag.color == defaultBlueColor
+        }
+
+        guard !tagsNeedingColors.isEmpty else {
+            // All tags already have proper colors
+            UserDefaults.standard.set(true, forKey: Self.tagColorAssignmentKey)
+            logger.info("All tags already have assigned colors")
+            return
+        }
+
+        logger.info("Assigning colors to \(tagsNeedingColors.count) existing tags")
+
+        // Sort tags by name to ensure consistent ordering
+        let sortedTags = tagsNeedingColors.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+
+        // Assign colors from the palette
+        for (index, tag) in sortedTags.enumerated() {
+            let colorIndex = index % CollectionService.tagColorPalette.count
+            let newColor = CollectionService.tagColorPalette[colorIndex]
+
+            do {
+                try await collectionService.updateTag(tag.id, color: newColor)
+                logger.info("Assigned color \(newColor) to tag: \(tag.name)")
+            } catch {
+                logger.error("Failed to assign color to tag \(tag.name): \(error.localizedDescription)")
+            }
+        }
+
+        // Mark as complete so this never runs again
+        UserDefaults.standard.set(true, forKey: Self.tagColorAssignmentKey)
+        logger.info("One-time tag color assignment completed")
     }
 }

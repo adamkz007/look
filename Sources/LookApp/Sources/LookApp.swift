@@ -30,6 +30,10 @@ struct LookApp: App {
                 Button("Regenerate All Thumbnails") {
                     environment.shouldRegenerateThumbnails = true
                 }
+
+                Button("Reassign Tag Colors") {
+                    reassignTagColors()
+                }
                 .keyboardShortcut("T", modifiers: [.command, .shift])
             }
         }
@@ -689,6 +693,47 @@ private struct RootView: View {
             await MainActor.run {
                 refreshDocumentList()
             }
+        }
+    }
+
+    // MARK: - Tag Management
+
+    func reassignTagColors() {
+        Task {
+            let logger = LookLogger(category: "tags")
+            logger.info("Manually reassigning tag colors")
+
+            // Fetch all existing tags
+            environment.collectionService.fetchAllTags()
+            let existingTags = environment.collectionService.tags
+
+            guard !existingTags.isEmpty else {
+                logger.info("No tags to reassign colors to")
+                return
+            }
+
+            // Sort tags by name to ensure consistent ordering
+            let sortedTags = existingTags.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+
+            // Assign colors from the palette
+            for (index, tag) in sortedTags.enumerated() {
+                let colorIndex = index % CollectionService.tagColorPalette.count
+                let newColor = CollectionService.tagColorPalette[colorIndex]
+
+                do {
+                    try await environment.collectionService.updateTag(tag.id, color: newColor)
+                    logger.info("Assigned color \(newColor) to tag: \(tag.name)")
+                } catch {
+                    logger.error("Failed to assign color to tag \(tag.name): \(error.localizedDescription)")
+                }
+            }
+
+            // Refresh the sidebar to show new colors
+            await MainActor.run {
+                refreshDocumentList()
+            }
+
+            logger.info("Manual tag color reassignment completed")
         }
     }
 

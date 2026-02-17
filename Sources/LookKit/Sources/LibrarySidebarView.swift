@@ -122,7 +122,7 @@ public struct LibrarySidebarView: View {
                 ForEach(viewModel.tags) { tag in
                     if editingTagID == tag.id {
                         HStack {
-                            Image(systemName: "tag")
+                            Image(systemName: "tag.fill")
                                 .foregroundColor(tag.color.flatMap { Color(hex: $0) })
                             TextField("Tag name", text: $editingTagName, onCommit: {
                                 if !editingTagName.isEmpty {
@@ -136,7 +136,7 @@ public struct LibrarySidebarView: View {
                     } else {
                         SidebarItem(
                             title: tag.name,
-                            icon: "tag",
+                            icon: "tag.fill",
                             color: tag.color,
                             count: tag.itemCount,
                             id: .tag(tag.id)
@@ -265,8 +265,18 @@ struct SidebarItem: View {
 
     var body: some View {
         HStack {
-            Label(title, systemImage: icon)
-                .foregroundColor(colorValue)
+            if icon == "tag.fill" && colorValue != nil {
+                // Special styling for colored tags
+                HStack(spacing: 8) {
+                    Image(systemName: icon)
+                        .foregroundColor(colorValue)
+                        .font(.system(size: 14))
+                    Text(title)
+                }
+            } else {
+                Label(title, systemImage: icon)
+                    .foregroundColor(colorValue)
+            }
             Spacer()
             if let count = count {
                 Text("\(count)")
@@ -377,7 +387,7 @@ private struct SidebarFooterView: View {
     }
 }
 
-extension Color {
+public extension Color {
     init?(hex: String) {
         var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
         hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")

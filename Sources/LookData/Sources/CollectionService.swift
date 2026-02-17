@@ -10,6 +10,23 @@ public final class CollectionService: ObservableObject {
     private let persistenceController: PersistenceController
     private let logger: LookLogger
 
+    // macOS/iPadOS style tag colors (matches Finder tags)
+    public static let tagColorPalette = [
+        "#FF6B6B", // Red
+        "#FF9500", // Orange
+        "#FFCC00", // Yellow
+        "#34C759", // Green
+        "#00C7BE", // Teal
+        "#007AFF", // Blue
+        "#AF52DE"  // Purple
+    ]
+
+    /// Get the next color that should be assigned to a new tag
+    public var nextTagColor: String {
+        let colorIndex = tags.count % Self.tagColorPalette.count
+        return Self.tagColorPalette[colorIndex]
+    }
+
     public init(persistenceController: PersistenceController, logger: LookLogger = LookLogger(category: "collections")) {
         self.persistenceController = persistenceController
         self.logger = logger
@@ -186,14 +203,25 @@ public final class CollectionService: ObservableObject {
     public func createTag(name: String, color: String? = nil) async throws -> UUID {
         let context = persistenceController.newBackgroundContext()
 
+        // Auto-assign color from palette if not provided
+        let assignedColor: String
+        if let color = color {
+            assignedColor = color
+        } else {
+            // Get the count of existing tags to determine the next color
+            let tagCount = tags.count
+            let colorIndex = tagCount % Self.tagColorPalette.count
+            assignedColor = Self.tagColorPalette[colorIndex]
+        }
+
         let tag = Tag(context: context)
         tag.id = UUID()
         tag.name = name
-        tag.color = color ?? "#3B82F6"
+        tag.color = assignedColor
         tag.createdAt = Date()
 
         try context.save()
-        logger.info("Created tag: \(tag.id!.uuidString)")
+        logger.info("Created tag: \(tag.id!.uuidString) with color: \(assignedColor)")
 
         await MainActor.run {
             fetchAllTags()

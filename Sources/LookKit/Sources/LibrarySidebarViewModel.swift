@@ -32,7 +32,7 @@ public final class LibrarySidebarViewModel: ObservableObject {
     public func createTag() {
         Task {
             if let onCreateTag = onCreateTag,
-               let tagID = await onCreateTag("New Tag", "#3B82F6") {
+               let tagID = await onCreateTag("New Tag", nil) {
                 await MainActor.run {
                     selectedItem = .tag(tagID)
                     pendingEditTagID = tagID

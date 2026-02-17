@@ -1,0 +1,103 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., 1.0.0)'
+        required: true
+        default: '1.0.0'
+
+jobs:
+  build:
+    name: Build macOS App
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Build macOS App
+        run: |
+          xcodebuild -project Look.xcodeproj \
+            -scheme Look \
+            -configuration Release \
+            -archivePath build/Look.xcarchive \
+            archive
+
+      - name: Export Archive
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/Look.xcarchive \
+            -exportPath build/export \
+            -exportOptionsPlist ExportOptions.plist
+
+      - name: Create DMG
+        run: |
+          mkdir -p build/dmg
+          cp -R build/export/Look.app build/dmg/
+
+          # Create a simple DMG
+          hdiutil create -volname "Look" \
+            -srcfolder build/dmg \
+            -ov -format UDZO \
+            build/Look-${{ github.event.inputs.version || github.ref_name }}.dmg
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Look-macOS
+          path: |
+            build/Look-*.dmg
+            build/export/Look.app
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Look-macOS
+          path: ./artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: false
+          prerelease: false
+          files: |
+            ./artifacts/*.dmg
+          body: |
+            ## Look ${{ github.ref_name }}
+
+            ### What's New
+            - PDF viewing with highlighting and annotations
+            - Markdown note-taking with live preview
+            - Document organization with collections and tags
+            - Full-text search across documents and notes
+            - Native macOS and iPadOS support
+
+            ### Installation
+            1. Download Look-${{ github.ref_name }}.dmg
+            2. Open the DMG file
+            3. Drag Look.app to your Applications folder
+            4. Launch Look from Applications
+
+            ### System Requirements
+            - macOS 14.0 (Sonoma) or later
+            - Apple Silicon or Intel Mac
+
+            ---
+            *Look is a privacy-focused research workspace that stores all data locally.*

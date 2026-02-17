@@ -191,6 +191,12 @@ struct DocumentRow: View {
                         Text("/")
                     }
 
+                    // Page count for PDFs
+                    if !document.isEPUB && document.pageCount > 0 {
+                        Text("\(document.pageCount) page\(document.pageCount == 1 ? "" : "s")")
+                        Text("/")
+                    }
+
                     // File size
                     Text(formattedFileSize)
 
@@ -777,7 +783,41 @@ public struct ContentSearchBar: View {
             Divider()
                 .frame(height: 14)
 
-            // Advanced dropdown
+            // Sort dropdown
+            Menu {
+                ForEach(SortOption.allCases, id: \.self) { option in
+                    Button {
+                        viewModel.sortOption = option
+                    } label: {
+                        HStack {
+                            Label(option.label, systemImage: option.icon)
+                            if viewModel.sortOption == option {
+                                Spacer()
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 10))
+                            }
+                        }
+                    }
+                }
+            } label: {
+                HStack(spacing: 3) {
+                    Image(systemName: sortIconForCurrentOption)
+                        .font(.system(size: 11))
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 9))
+                }
+                .foregroundColor(.secondary)
+            }
+            #if os(macOS)
+            .menuStyle(.borderlessButton)
+            #endif
+            .help("Sort: \(viewModel.sortOption.label)")
+            .fixedSize()
+
+            Divider()
+                .frame(height: 14)
+
+            // Advanced search dropdown
             Menu {
                 Picker(selection: Binding(
                     get: { viewModel.searchMode },
@@ -827,6 +867,15 @@ public struct ContentSearchBar: View {
 
     private var placeholder: String {
         viewModel.searchMode == .content ? "Search document content…" : "Search by name…"
+    }
+
+    private var sortIconForCurrentOption: String {
+        switch viewModel.sortOption {
+        case .titleAscending, .titleDescending:
+            return "textformat"
+        case .dateNewest, .dateOldest:
+            return "calendar"
+        }
     }
 }
 

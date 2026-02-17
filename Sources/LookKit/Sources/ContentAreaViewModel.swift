@@ -1,11 +1,47 @@
 import Combine
 import Foundation
+import SwiftUI
 
 // MARK: - Search Types
 
 public enum SearchMode: Equatable, Hashable {
     case fileName
     case content
+}
+
+// MARK: - Sort Options
+
+public enum SortOption: String, CaseIterable {
+    case titleAscending = "Title A → Z"
+    case titleDescending = "Title Z → A"
+    case dateNewest = "Date Modified (Newest)"
+    case dateOldest = "Date Modified (Oldest)"
+
+    public var icon: String {
+        switch self {
+        case .titleAscending:
+            return "textformat.abc"
+        case .titleDescending:
+            return "textformat.abc"
+        case .dateNewest:
+            return "calendar.badge.clock"
+        case .dateOldest:
+            return "calendar.badge.clock"
+        }
+    }
+
+    public var label: String {
+        switch self {
+        case .titleAscending:
+            return "Title (A → Z)"
+        case .titleDescending:
+            return "Title (Z → A)"
+        case .dateNewest:
+            return "Newest First"
+        case .dateOldest:
+            return "Oldest First"
+        }
+    }
 }
 
 public struct SearchResultItem: Identifiable, Equatable {
@@ -60,6 +96,9 @@ public final class ContentAreaViewModel: ObservableObject {
     @Published public var isSearchingContent: Bool = false
     @Published public var contentSearchResults: [SearchResultItem] = []
 
+    // Sort state
+    @Published public var sortOption: SortOption = .dateNewest
+
     public var documentService: AnyObject?
     public var onImport: (() -> Void)?
     public var onRefresh: ((SidebarSelection?) -> Void)?
@@ -90,18 +129,72 @@ public final class ContentAreaViewModel: ObservableObject {
             }
     }
 
-    // MARK: - File Name Filtering
+    // MARK: - File Name Filtering and Sorting
 
     public var filteredDocuments: [DocumentItem] {
-        guard searchMode == .fileName, !searchText.isEmpty else { return documents }
-        let query = searchText.lowercased()
-        return documents.filter { $0.title.lowercased().contains(query) }
+        let filtered: [DocumentItem]
+        if searchMode == .fileName && !searchText.isEmpty {
+            let query = searchText.lowercased()
+            filtered = documents.filter { $0.title.lowercased().contains(query) }
+        } else {
+            filtered = documents
+        }
+
+        return sortDocuments(filtered)
     }
 
     public var filteredNotes: [NoteItem] {
-        guard searchMode == .fileName, !searchText.isEmpty else { return notes }
-        let query = searchText.lowercased()
-        return notes.filter { $0.title.lowercased().contains(query) }
+        let filtered: [NoteItem]
+        if searchMode == .fileName && !searchText.isEmpty {
+            let query = searchText.lowercased()
+            filtered = notes.filter { $0.title.lowercased().contains(query) }
+        } else {
+            filtered = notes
+        }
+
+        return sortNotes(filtered)
+    }
+
+    private func sortDocuments(_ docs: [DocumentItem]) -> [DocumentItem] {
+        switch sortOption {
+        case .titleAscending:
+            return docs.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+        case .titleDescending:
+            return docs.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedDescending }
+        case .dateNewest:
+            return docs.sorted {
+                let date0 = $0.updatedAt ?? $0.createdAt ?? Date.distantPast
+                let date1 = $1.updatedAt ?? $1.createdAt ?? Date.distantPast
+                return date0 > date1
+            }
+        case .dateOldest:
+            return docs.sorted {
+                let date0 = $0.updatedAt ?? $0.createdAt ?? Date.distantFuture
+                let date1 = $1.updatedAt ?? $1.createdAt ?? Date.distantFuture
+                return date0 < date1
+            }
+        }
+    }
+
+    private func sortNotes(_ noteList: [NoteItem]) -> [NoteItem] {
+        switch sortOption {
+        case .titleAscending:
+            return noteList.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+        case .titleDescending:
+            return noteList.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedDescending }
+        case .dateNewest:
+            return noteList.sorted {
+                let date0 = $0.updatedAt ?? $0.createdAt ?? Date.distantPast
+                let date1 = $1.updatedAt ?? $1.createdAt ?? Date.distantPast
+                return date0 > date1
+            }
+        case .dateOldest:
+            return noteList.sorted {
+                let date0 = $0.updatedAt ?? $0.createdAt ?? Date.distantFuture
+                let date1 = $1.updatedAt ?? $1.createdAt ?? Date.distantFuture
+                return date0 < date1
+            }
+        }
     }
 
     /// Whether a content search is active (mode is content and query is non-empty)
